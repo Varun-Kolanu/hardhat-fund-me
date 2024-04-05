@@ -7,6 +7,8 @@ pragma solidity ^0.8.19;
 
 import "./PriceConverter.sol";
 
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+
 error NotOwner();
 
 contract FundMe {
@@ -21,8 +23,11 @@ contract FundMe {
     // address public owner; // owner is getting changed only once after this line. So let's mark it immutable
     address public immutable i_owner;
 
-    constructor() { // called right after deployment
+    AggregatorV3Interface private s_priceFeed;
+
+    constructor(AggregatorV3Interface priceFeedAddress) { // called right after deployment
         i_owner = msg.sender; // the one who deployed
+        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     // constant and immutable stores in byte code of contract rather than in storage
@@ -59,7 +64,7 @@ contract FundMe {
         // msg.value has 18 decimal places since it is in wei (1e-18 ETH)
         // To compare it with MINIMUM_USD, we need to convert it into USD and with 18 decimals (for consistency) since many functions assume that token are 18 decimaled
 
-        uint256 convertedPrice = msg.value.getConvertedPrice();
+        uint256 convertedPrice = msg.value.getConvertedPrice(s_priceFeed);
         require(convertedPrice >= MINIMUM_USD, "Didn't send enough!");
         if (!addressExists(msg.sender)) {
             funders.push(msg.sender); // msg.sender: address of sender

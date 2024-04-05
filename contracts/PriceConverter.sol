@@ -7,10 +7,8 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 library PriceConverter {
 
-    function getConversionRatio() internal view returns(uint256){
+    function getConversionRatio(AggregatorV3Interface priceFeed) internal view returns(uint256){
         // ABI is needed: This is the interface (showing all the functions) of the smart contract
-        // Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306 (ETH/USD)
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         // answer: ETH in USD
 
@@ -21,13 +19,8 @@ library PriceConverter {
         return uint256(decimalConvertedPrice);
     }
 
-    function getConvertedPrice(uint256 priceInWei) internal view returns(uint256) {
+    function getConvertedPrice(uint256 priceInWei, AggregatorV3Interface priceFeed) internal view returns(uint256) {
         // Always multiply before dividing
-        return (priceInWei * getConversionRatio()) / 1e18; // Since, priceInWei should be conveted to ETH first, divided by 1e18
-    }
-
-    function getVersion() internal view returns(uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-        return priceFeed.version();
+        return (priceInWei * getConversionRatio(priceFeed)) / 1e18; // Since, priceInWei should be conveted to ETH first, divided by 1e18
     }
 }
