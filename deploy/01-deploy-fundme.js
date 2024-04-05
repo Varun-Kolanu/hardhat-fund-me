@@ -1,17 +1,38 @@
 const { network } = require("hardhat");
-const { networkConfig } = require("../helper-hardhat-config.js");
+const {
+    networkConfig,
+    developmentChains,
+} = require("../helper-hardhat-config.js");
+const { verify } = require("../utils/verify.js");
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
-    // hre: hardhat
     const { deploy, log } = deployments;
-    const { deployer } = await getNamedAccounts(); // nmedaccounts defined in config
+    const { deployer } = await getNamedAccounts();
     const { chainId } = network.config;
 
-    // For localhost deployments, we shall use mocks
+    let ethUsdPriceFeedAddress;
+    if (developmentChains.includes(network.name)) {
+        const mockAggregator = await deployments.get("MockV3Aggregator");
+        ethUsdPriceFeedAddress = mockAggregator.address;
+    } else {
+        ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeedAddress;
+    }
 
+    const args = [ethUsdPriceFeedAddress];
     const fundMe = await deploy("FundMe", {
         from: deployer,
-        args: [networkConfig[chainId].ethUsdPriceFeedAddress], // constructor args
+        args,
         log: true,
     });
+
+    if (
+        !developmentChains.includes(network.name) &&
+        process.env.ETHERSCAN_API_KEY
+    ) {
+        await verify(fundMe.address, args);
+    }
+    log(`Deployed to ${network.name}`);
+    log("----------------------------------------------------");
 };
+
+module.exports.tags = ["all", "fundme"];

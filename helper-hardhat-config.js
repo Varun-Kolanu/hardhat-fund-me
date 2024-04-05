@@ -9,6 +9,14 @@ const networkConfig = {
     },
 };
 
+const developmentChains = ["hardhat", "localhost"];
+
+const DECIMALS = 8;
+const INITIAL_ANSWER = 200000000000; // The initial TOKEN/USD rate
+
 module.exports = {
     networkConfig,
+    developmentChains,
+    DECIMALS,
+    INITIAL_ANSWER,
 };
