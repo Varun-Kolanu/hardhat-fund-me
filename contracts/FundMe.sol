@@ -22,7 +22,7 @@ contract FundMe {
     // State Variables
     uint256 public constant MINIMUM_USD = 50 * 1e18;
     address public immutable i_owner;
-    AggregatorV3Interface private s_priceFeed;
+    AggregatorV3Interface private immutable s_priceFeed;
     address[] public funders;
     mapping(address => uint256) public addressToAmountSent;
 
@@ -84,5 +84,9 @@ contract FundMe {
             }
         }
         return false;
+    }
+
+    function getPriceFeed() public view returns (AggregatorV3Interface) {
+        return s_priceFeed;
     }
 }
