@@ -37,11 +37,11 @@ module.exports = {
         },
     },
     gasReporter: {
-        enabled: false,
+        enabled: true,
         outputFile: "gas-report.txt",
         noColors: true,
         currency: "USD",
-        coinmarketcap: COINMARKETCAP_API_KEY, // comment for no api call
+        // coinmarketcap: COINMARKETCAP_API_KEY, // comment for no api call
         // L1: "polygon", // Default: ethereum
     },
 };
