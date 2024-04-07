@@ -21,9 +21,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const args = [ethUsdPriceFeedAddress];
     const fundMe = await deploy("FundMe", {
         from: deployer,
-        args,
+        args: [ethUsdPriceFeedAddress],
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
+        // gasLimit: 30000000,
+        // gasPrice: 3000000000,
     });
 
     if (

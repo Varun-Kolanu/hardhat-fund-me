@@ -2,6 +2,9 @@
     "name": "hardhat-fund-me",
     "version": "1.0.0",
     "license": "MIT",
+    "author": {
+        "name": "Varun Kolanu"
+    },
     "devDependencies": {
         "@chainlink/contracts": "^1.0.0",
         "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -26,7 +29,14 @@
     },
     "scripts": {
         "test": "yarn hardhat test",
-        "coverage": "yarn hardhat coverage"
+        "test:staging": "yarn hardhat test --network sepolia",
+        "coverage": "yarn hardhat coverage",
+        "deploy": "yarn hardhat deploy",
+        "deploy:sepolia": "yarn hardhat deploy --network sepolia",
+        "lint": "yarn solhint 'contracts/*.sol'",
+        "lint:fix": "yarn solhint 'contracts/*.sol' --fix",
+        "format": "yarn prettier --write .",
+        "clean": "yarn hardhat clean"
     },
     "dependencies": {
         "dotenv": "^16.4.5"

@@ -8,6 +8,10 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 // Error Codes
 error FundMe__NotOwner();
+error FundMe__NotEnoughSent();
+error FundMe__CallFailed();
+
+// The above saved 6.2 USD (400rs approx)
 
 // Libraries, Interfaces, Contracts
 
@@ -26,10 +30,10 @@ contract FundMe {
     // storage takes so much memory (s_ : storage)
 
     uint256 public constant MINIMUM_USD = 50 * 1e18;
-    address public immutable i_owner;
+    address private immutable i_owner;
     AggregatorV3Interface private immutable i_priceFeed;
-    address[] public s_funders;
-    mapping(address => uint256) public s_addressToAmountSent;
+    address[] private s_funders;
+    mapping(address => uint256) private s_addressToAmountSent;
 
     // Modifiers
     modifier onlyOwner() {
@@ -59,7 +63,9 @@ contract FundMe {
      */
     function fund() public payable {
         uint256 convertedPrice = msg.value.getConvertedPrice(i_priceFeed);
-        require(convertedPrice >= MINIMUM_USD, "Didn't send enough!");
+        if (convertedPrice < MINIMUM_USD) {
+            revert FundMe__NotEnoughSent();
+        }
         if (!addressExists(msg.sender)) {
             s_funders.push(msg.sender);
         }
@@ -77,7 +83,9 @@ contract FundMe {
         (bool callSuccess, ) = payable(i_owner).call{
             value: address(this).balance
         }("");
-        require(callSuccess, "Call failed");
+        if (!callSuccess) {
+            revert FundMe__CallFailed();
+        }
     }
 
     function cheaperWithdraw() public onlyOwner {
@@ -92,9 +100,12 @@ contract FundMe {
         (bool callSuccess, ) = payable(i_owner).call{
             value: address(this).balance
         }("");
-        require(callSuccess, "Call failed");
+        if (!callSuccess) {
+            revert FundMe__CallFailed();
+        }
     }
 
+    // View, Pure
     /**
      * @param _checkAddress The address to be checked if it is already in funders
      */
@@ -109,5 +120,17 @@ contract FundMe {
 
     function getPriceFeed() public view returns (AggregatorV3Interface) {
         return i_priceFeed;
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
+
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
+
+    function getAmountSentBy(address funder) public view returns (uint256) {
+        return s_addressToAmountSent[funder];
     }
 }
